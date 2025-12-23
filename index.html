@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game Hub</title>
+    <style>
+        body {
+            background-color: #111;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 50px;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        button {
+            font-size: 2.5vw;
+            padding: 25px 50px;
+            cursor: pointer;
+            margin: 10px;
+            background: linear-gradient(45deg, #ff6a00, #ee0979);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            transition: transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 5px #d94f00;
+            user-select: none;
+        }
+
+        button:hover {
+            transform: scale(1.1);
+        }
+
+        button:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px #d94f00;
+        }
+
+        input {
+            font-size: 1.5vw;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            text-align: center;
+            width: 100px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+
+        #score, #timer, #highScore,
+        #guessMessage, #guessScore {
+            font-size: 2vw;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ================= CLICKER PAGE ================= -->
+<div id="clickerPage" class="page active">
+    <h1>🎮 Clicker Game</h1>
+    <p>Click the button to get points!</p>
+
+    <button onclick="addPoint()">CLICK ME</button>
+    <button onclick="restartClicker()">Restart</button>
+    <button onclick="showGuessGame()">Go to Guessing Game</button>
+
+    <div id="score">Score: 0</div>
+    <div id="timer">Time Left: 30s</div>
+    <div id="highScore">High Score: 0</div>
+    <div id="clickerMessage"></div>
+</div>
+
+<!-- ================= GUESS PAGE ================= -->
+<div id= "guessPage"class="page">
+    <h1>🔢 Number Guessing Game</h1>
+    <p>Guess a number between 1 and 100</p>
+
+
+    <input type="number" id="guessInput" min="1" max="10">
+    <br><br>
+    <button onclick="checkGuess()">Guess</button>
+    <button onclick="restartGuess()">Restart</button>
+    <button onclick="showClickerGame()">Back to Clicker</button>
+
+    <div id="guessMessage"></div>
+    <div id="guessScore">Score: 0</div>
+    <div id="attempts">Attempts Left: 5</div>
+</div>
+
+<script>
+/* ========= PAGE SWITCHING ========= */
+function showGuessGame() {
+    document.getElementById("clickerPage").classList.remove("active");
+    document.getElementById("guessPage").classList.add("active");
+}
+
+function showClickerGame() {
+    document.getElementById("guessPage").classList.remove("active");
+    document.getElementById("clickerPage").classList.add("active");
+}
+
+/* ========= CLICKER GAME ========= */
+let score = 0;
+let highScore = 0;
+let timeLeft = 30;
+let timer;
+let gameActive = true;
+
+function startTimer() {
+    clearInterval(timer);
+    timer = setInterval(() => {
+        if (timeLeft > 0) {
+            timeLeft--;
+            document.getElementById("timer").textContent = "Time Left: " + timeLeft + "s";
+        } else {
+            gameActive = false;
+            clearInterval(timer);
+            document.getElementById("clickerMessage").textContent = "⏰ Time's up!";
+            if (score > highScore) {
+                highScore = score;
+                document.getElementById("highScore").textContent = "High Score: " + highScore;
+            }
+        }
+    }, 1000);
+}
+
+function addPoint() {
+    if (!gameActive) return;
+    score++;
+    document.getElementById("score").textContent = "Score: " + score;
+}
+
+function restartClicker() {
+    score = 0;
+    timeLeft = 30;
+    gameActive = true;
+    document.getElementById("score").textContent = "Score: 0";
+    document.getElementById("timer").textContent = "Time Left: 30s";
+    document.getElementById("clickerMessage").textContent = "";
+    startTimer();
+}
+
+startTimer();
+
+/* ========= GUESSING GAME ========= */
+let randomNumber = Math.floor(Math.random() * 100) + 1;
+let guessScore = 0;
+let attemptsLeft = 5;
+
+function checkGuess() {
+    if (attemptsLeft <= 0) return;
+
+    const guess = Number(document.getElementById("guessInput").value);
+    const msg = document.getElementById("guessMessage");
+
+    if (guess < 1 || guess > 100) {
+        msg.textContent = "❌ Enter a number 1–100";
+        return;
+    }
+
+    attemptsLeft--;
+    document.getElementById("attempts").textContent =
+        "Attempts Left: " + attemptsLeft;
+
+    if (guess === randomNumber) {
+        msg.textContent = "✅ Correct!";
+        guessScore++;
+        document.getElementById("guessScore").textContent =
+            "Score: " + guessScore;
+
+        randomNumber = Math.floor(Math.random() * 100) + 1;
+        attemptsLeft = 5;
+        document.getElementById("attempts").textContent =
+            "Attempts Left: 5";
+    } else if (guess < randomNumber) {
+        msg.textContent = "⬆️ Too low!";
+    } else {
+        msg.textContent = "⬇️ Too high!";
+    }
+
+    if (attemptsLeft === 0 && guess !== randomNumber) {
+        msg.textContent =
+            "💀 Game Over! Number was " + randomNumber;
+    }
+
+    document.getElementById("guessInput").value = "";
+}
+function restartGuess() {
+    randomNumber = Math.floor(Math.random() * 100) + 1;
+    guessScore = 0;
+    attemptsLeft = 5;
+
+    document.getElementById("guessScore").textContent = "Score: 0";
+    document.getElementById("attempts").textContent = "Attempts Left: 5";
+    document.getElementById("guessMessage").textContent = "";
+}
+
+</script>
+
+</body>
+</html>
